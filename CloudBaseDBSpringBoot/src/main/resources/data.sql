@@ -1,0 +1,3 @@
+-- This project now uses Apache CouchDB.
+-- SQL seed data is not applicable.
+-- Initial product data is seeded programmatically via DataInitializer.java on startup.

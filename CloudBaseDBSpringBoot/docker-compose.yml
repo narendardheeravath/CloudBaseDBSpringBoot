@@ -1,0 +1,61 @@
+version: "3.9"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# CloudBaseDBSpringBoot – CouchDB infrastructure
+# ─────────────────────────────────────────────────────────────────────────────
+# Usage:
+#   docker-compose up -d            # start CouchDB in background
+#   docker-compose down             # stop and remove containers
+#   docker-compose down -v          # stop and delete persisted data
+#   docker-compose logs -f couchdb  # tail logs
+#
+# CouchDB Fauxton UI : http://localhost:5984/_utils
+# Admin credentials  : admin / admin123  (change before production use)
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+
+  couchdb:
+    image: couchdb:3.3.3
+    container_name: cloudbasedb-couchdb
+    ports:
+      - "5984:5984"            # CouchDB HTTP API  (host:container)
+    volumes:
+      - couchdb-data:/opt/couchdb/data          # persist documents
+      - couchdb-config:/opt/couchdb/etc/local.d # persist config changes
+    environment:
+      COUCHDB_USER: admin
+      COUCHDB_PASSWORD: admin123               # override with a secret in production
+      # Enable CORS so the Fauxton UI and local clients can connect
+      COUCHDB_ENABLE_CORS: "true"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5984/_up"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 15s
+
+  # ── Optional: CouchDB cluster initialiser ──────────────────────────────────
+  # Runs once to finish single-node cluster setup (required for CouchDB 3.x)
+  couchdb-init:
+    image: curlimages/curl:8.7.1
+    container_name: cloudbasedb-couchdb-init
+    depends_on:
+      couchdb:
+        condition: service_healthy
+    restart: "no"
+    entrypoint: >
+      sh -c "
+        curl -s -X PUT http://admin:admin123@couchdb:5984/_users &&
+        curl -s -X PUT http://admin:admin123@couchdb:5984/_replicator &&
+        curl -s -X PUT http://admin:admin123@couchdb:5984/_global_changes &&
+        curl -s -X PUT http://admin:admin123@couchdb:5984/products &&
+        echo 'CouchDB initialisation complete'
+      "
+
+volumes:
+  couchdb-data:
+    name: cloudbasedb-couchdb-data
+  couchdb-config:
+    name: cloudbasedb-couchdb-config

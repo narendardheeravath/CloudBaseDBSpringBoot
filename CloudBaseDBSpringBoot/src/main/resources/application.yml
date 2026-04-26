@@ -1,0 +1,40 @@
+server:
+  port: 8096
+
+spring:
+  application:
+    name: cloud-base-db-spring-boot
+
+# ── CouchDB connection ────────────────────────────────────────────────────────
+# Matches the credentials defined in docker-compose.yml
+# Override via environment variables in production:
+#   COUCHDB_PROTOCOL, COUCHDB_HOST, COUCHDB_PORT, COUCHDB_USERNAME,
+#   COUCHDB_PASSWORD, COUCHDB_DATABASE
+couchdb:
+  protocol: ${COUCHDB_PROTOCOL:http}
+  host: ${COUCHDB_HOST:localhost}
+  port: ${COUCHDB_PORT:5984}
+  username: ${COUCHDB_USERNAME:admin}
+  password: ${COUCHDB_PASSWORD:admin123}
+  database: ${COUCHDB_DATABASE:products}
+
+# Swagger / OpenAPI
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    tags-sorter: alpha
+    operations-sorter: alpha
+    display-request-duration: true
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
