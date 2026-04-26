@@ -1,4 +1,4 @@
-# CloudBaseDBSpringBoot
+# CouchBaseDBSpringBoot
 
 A cloud-ready Spring Boot REST API for product management backed by **Apache CouchDB**. Documents are stored as JSON in CouchDB and queried via its Mango query API over HTTP. Includes full Swagger UI documentation and Spring Actuator monitoring.
 
